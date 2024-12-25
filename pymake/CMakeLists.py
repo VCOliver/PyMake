@@ -3,16 +3,23 @@ import subprocess
 import argparse
 
 def parse_arguments():
-    parser = argparse.ArgumentParser()
+    cpp_standards = [98, 3, 11, 14, 17, 20, 23]
+    supported_languages = ["CXX", "C", "CSharp", "CUDA", "OBJC", "OBJCXX"]
+    
+    parser = argparse.ArgumentParser(prog="PyMake", description="A CMake generator for small projects")
     parser.add_argument("project_name", type=str, help="The name of the CMake Project")
-    parser.add_argument("--cxx-standard", type=int, default=17, help="Which version of compiler to use")
+    parser.add_argument("-v", "--version", type=str, help="Project version")
+    parser.add_argument("-l", "--languages", nargs="*", default="CXX", choices=supported_languages, help="Which languages needed to build the project")
+    parser.add_argument("--cxx-standard", type=int, default=17, choices=cpp_standards, help="Which version of compiler to use")
     parser.add_argument("--cxx-standard-not-required", action="store_false", help="Whether or not to require the compiler version specified")
     
     return parser.parse_args()
 
 class CMakeLists:    
-    def __init__(self, project_name, cxx_std=17, cxx_stc_required=True):
+    def __init__(self, project_name: str, proj_version:str =None, languages: str | list="CXX", cxx_std=17, cxx_stc_required=True):
         self.__project_name = project_name
+        self.__proj_version = proj_version
+        self.__languages = languages
         self.__version: str = self.__get_cmake_version()
         self.__cxx_std: int = cxx_std
         self.__cxx_std_not_required: bool = cxx_stc_required
@@ -60,10 +67,11 @@ class CMakeLists:
         PROJECT_NAME = r'${PROJECT_NAME}'
         SOURCES = r'${SOURCES}'
         
+        version = " VERSION "+self.__proj_version if self.__proj_version else ""
         src_files = "\n    ".join(self.__src_files)
         
         cmake_content = f"""cmake_minimum_required(VERSION {self.__version})
-project({self.__project_name})
+project({self.__project_name}{version} LANGUAGES {' '.join(self.__languages)})
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD {self.__cxx_std})
