@@ -1,34 +1,10 @@
 import os
 import subprocess
-import argparse
-
-def str_to_bool(value):
-    """Convert string to boolean."""
-    if value.lower() in ['true', '1', 't', 'y', 'yes', 'on']:
-        return True
-    elif value.lower() in ['false', '0', 'f', 'n', 'no', 'off']:
-        return False
-    else:
-        raise argparse.ArgumentTypeError(f"Invalid boolean value: {value}")
-
-def parse_arguments():
-    cpp_standards = [98, 3, 11, 14, 17, 20, 23]
-    supported_languages = ["CXX", "C", "CSharp", "CUDA", "OBJC", "OBJCXX"]
-    
-    parser = argparse.ArgumentParser(prog="PyMake", description="A CMake generator for small projects")
-    parser.add_argument("project_name", type=str, help="The name of the CMake Project")
-    parser.add_argument("-v", "--version", type=str, help="Project version")
-    parser.add_argument("-l", "--languages", nargs="*", default="CXX", choices=supported_languages, help="Which languages needed to build the project")
-    parser.add_argument("--cxx-standard", type=int, default=17, choices=cpp_standards, help="Which version of compiler to use")
-    parser.add_argument("--cxx-standard-not-required", action="store_true", help="Whether or not to require the compiler version specified")
-    parser.add_argument("--cxx-extensions", type=str_to_bool, default=True, choices=[True, False], help="Whether compiler specific extensions should be used")
-    
-    return parser.parse_args()
 
 class CMakeLists:    
     def __init__(self, project_name: str, 
                  proj_version:str =None, 
-                 languages: str | list="CXX", 
+                 languages: list=["CXX"], 
                  cxx_std=17, 
                  cxx_stc_not_required=False,
                  cxx_extensions=True):
@@ -44,11 +20,8 @@ class CMakeLists:
         self.__include_dir: str = os.path.join(self.__root_dir, "include")
 
     def __get_cmake_version(self) -> str:
-        
         try:
-            # Run the 'cmake --version' command
             result = subprocess.run(['cmake', '--version'], capture_output=True, text=True, check=True)
-            # Print the output
             version = result.stdout.strip().split()[2]
             return version
         except FileNotFoundError:
@@ -61,7 +34,6 @@ class CMakeLists:
             raise
         
     def __find_files(self, start_dir: str, extensions: tuple = (".cpp", )) -> list:
-        """Find files with specified extensions, ignoring 'build' directories."""
         return [
             os.path.relpath(os.path.join(dirpath, file), start=start_dir)
             for dirpath, dirnames, files in os.walk(start_dir)
@@ -92,7 +64,6 @@ class CMakeLists:
         extentions = parse_langs(self.__languages)
         
         src_files = self.__find_files(self.__root_dir, extensions=extentions)
-        #self.__include_files = self.__find_files(self.__include_dir)
         
         if not src_files:
             raise FileNotFoundError("No source files found in 'src' directory.")
@@ -100,15 +71,15 @@ class CMakeLists:
         self.__src_files = src_files
         
     def generate_cmake(self):
-        
         PROJECT_NAME = r'${PROJECT_NAME}'
         SOURCES = r'${SOURCES}'
         
         version = " VERSION "+self.__proj_version if self.__proj_version else ""
         src_files = "\n    ".join(self.__src_files)
+        languages = " ".join(self.__languages)
         
         cmake_content = f"""cmake_minimum_required(VERSION {self.__version})
-project({self.__project_name}{version} LANGUAGES {' '.join(self.__languages)})
+project({self.__project_name}{version} LANGUAGES {languages})
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD {self.__cxx_std})
@@ -146,4 +117,3 @@ add_executable({PROJECT_NAME} {SOURCES})
     @property
     def cmake_version(self):
         return self.__version
-    
