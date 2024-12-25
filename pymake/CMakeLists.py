@@ -2,6 +2,15 @@ import os
 import subprocess
 import argparse
 
+def str_to_bool(value):
+    """Convert string to boolean."""
+    if value.lower() in ['true', '1', 't', 'y', 'yes', 'on']:
+        return True
+    elif value.lower() in ['false', '0', 'f', 'n', 'no', 'off']:
+        return False
+    else:
+        raise argparse.ArgumentTypeError(f"Invalid boolean value: {value}")
+
 def parse_arguments():
     cpp_standards = [98, 3, 11, 14, 17, 20, 23]
     supported_languages = ["CXX", "C", "CSharp", "CUDA", "OBJC", "OBJCXX"]
@@ -11,18 +20,25 @@ def parse_arguments():
     parser.add_argument("-v", "--version", type=str, help="Project version")
     parser.add_argument("-l", "--languages", nargs="*", default="CXX", choices=supported_languages, help="Which languages needed to build the project")
     parser.add_argument("--cxx-standard", type=int, default=17, choices=cpp_standards, help="Which version of compiler to use")
-    parser.add_argument("--cxx-standard-not-required", action="store_false", help="Whether or not to require the compiler version specified")
+    parser.add_argument("--cxx-standard-not-required", action="store_true", help="Whether or not to require the compiler version specified")
+    parser.add_argument("--cxx-extensions", type=str_to_bool, default=True, choices=[True, False], help="Whether compiler specific extensions should be used")
     
     return parser.parse_args()
 
 class CMakeLists:    
-    def __init__(self, project_name: str, proj_version:str =None, languages: str | list="CXX", cxx_std=17, cxx_stc_required=True):
+    def __init__(self, project_name: str, 
+                 proj_version:str =None, 
+                 languages: str | list="CXX", 
+                 cxx_std=17, 
+                 cxx_stc_not_required=False,
+                 cxx_extensions=True):
         self.__project_name = project_name
         self.__proj_version = proj_version
         self.__languages = languages
         self.__version: str = self.__get_cmake_version()
         self.__cxx_std: int = cxx_std
-        self.__cxx_std_not_required: bool = cxx_stc_required
+        self.__cxx_std_not_required: bool = "OFF" if cxx_stc_not_required else "ON"
+        self.__cxx_extensions: bool = "ON" if cxx_extensions else "OFF"
         self.__root_dir: str = os.getcwd()
         self.__src_dir: str = os.path.join(self.__root_dir, "src")
         self.__include_dir: str = os.path.join(self.__root_dir, "include")
@@ -97,6 +113,7 @@ project({self.__project_name}{version} LANGUAGES {' '.join(self.__languages)})
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD {self.__cxx_std})
 set(CMAKE_CXX_STANDARD_REQUIRED {self.__cxx_std_not_required})
+set(CMAKE_CXX_EXTENSIONS {self.__cxx_extensions})
 
 # Include directories
 include_directories(include)
