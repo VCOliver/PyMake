@@ -1,17 +1,18 @@
 cmake_minimum_required(VERSION 3.25.1)
-project(Test)
+project(test)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Include directories
-include_directories(/home/vcoliver/Documents/Coding/CMake/include)
+include_directories(include)
 
 # Source files
 set(SOURCES
-    main.cpp
+    src/main.cpp
+    src/hello/hello.cpp
 )
 
 # Add the executable
-add_executable(Test ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES})

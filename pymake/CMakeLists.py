@@ -15,7 +15,7 @@ class CMakeLists:
         self.__project_name = project_name
         self.__version: str = self.__get_cmake_version()
         self.__cxx_std: int = cxx_std
-        self.__cxx_std_required: bool = cxx_stc_required
+        self.__cxx_std_not_required: bool = cxx_stc_required
         self.__root_dir: str = os.getcwd()
         self.__src_dir: str = os.path.join(self.__root_dir, "src")
         self.__include_dir: str = os.path.join(self.__root_dir, "include")
@@ -38,15 +38,16 @@ class CMakeLists:
             raise
         
     def __find_files(self, start_dir: str, extensions: tuple = (".cpp", )) -> list:
-        """Find files with specified extensions."""
+        """Find files with specified extensions, ignoring 'build' directories."""
         return [
             os.path.relpath(os.path.join(dirpath, file), start=start_dir)
-            for dirpath, _, files in os.walk(start_dir)
+            for dirpath, dirnames, files in os.walk(start_dir)
+            if "build" not in dirpath.split(os.sep)
             for file in files if file.endswith(extensions)
         ]
-        
+            
     def find_project_files(self):
-        src_files = self.__find_files(self.__src_dir)
+        src_files = self.__find_files(self.__root_dir)
         self.__include_files = self.__find_files(self.__include_dir)
         
         if not src_files:
