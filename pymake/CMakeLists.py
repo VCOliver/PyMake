@@ -54,8 +54,29 @@ class CMakeLists:
         ]
             
     def find_project_files(self):
-        src_files = self.__find_files(self.__root_dir)
-        self.__include_files = self.__find_files(self.__include_dir)
+        def parse_langs(languages: list):
+            langs = languages
+            extensions = []
+            
+            if "C" in langs:
+                extensions.append(".c")
+            if "CXX" in langs:
+                extensions.append(".cpp")
+            if "CSharp" in langs:
+                extensions.append(".cs")
+            if "OBJC" in langs:
+                extensions.append(".m")
+            if "OBJCXX" in langs:
+                extensions.append(".mm")
+            if "CUDA" in langs:
+                extensions.append(".cu")
+                
+            return tuple(extensions)
+                
+        extentions = parse_langs(self.__languages)
+        
+        src_files = self.__find_files(self.__root_dir, extensions=extentions)
+        #self.__include_files = self.__find_files(self.__include_dir)
         
         if not src_files:
             raise FileNotFoundError("No source files found in 'src' directory.")

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25.1)
-project(test VERSION 0.0.1 LANGUAGES CXX)
+project(test VERSION 0.0.1 LANGUAGES C CXX)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -11,6 +11,7 @@ include_directories(include)
 # Source files
 set(SOURCES
     src/main.cpp
+    src/hello/hi.c
     src/hello/hello.cpp
 )
 
