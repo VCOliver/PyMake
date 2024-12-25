@@ -1,31 +1,27 @@
 import os
 import subprocess
-import argparse
-
-def parse_arguments():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name", type=str, help="The name of the CMake Project")
-    parser.add_argument("--cxx-standard", type=int, default=17, help="Which version of compiler to use")
-    parser.add_argument("--cxx-standard-not-required", action="store_false", help="Whether or not to require the compiler version specified")
-    
-    return parser.parse_args()
 
 class CMakeLists:    
-    def __init__(self, project_name, cxx_std=17, cxx_stc_required=True):
+    def __init__(self, project_name: str, 
+                 proj_version:str =None, 
+                 languages: list=["CXX"], 
+                 cxx_std=17, 
+                 cxx_stc_not_required=False,
+                 cxx_extensions=True):
         self.__project_name = project_name
+        self.__proj_version = proj_version
+        self.__languages = languages
         self.__version: str = self.__get_cmake_version()
         self.__cxx_std: int = cxx_std
-        self.__cxx_std_required: bool = cxx_stc_required
+        self.__cxx_std_not_required: bool = "OFF" if cxx_stc_not_required else "ON"
+        self.__cxx_extensions: bool = "ON" if cxx_extensions else "OFF"
         self.__root_dir: str = os.getcwd()
         self.__src_dir: str = os.path.join(self.__root_dir, "src")
         self.__include_dir: str = os.path.join(self.__root_dir, "include")
 
     def __get_cmake_version(self) -> str:
-        
         try:
-            # Run the 'cmake --version' command
             result = subprocess.run(['cmake', '--version'], capture_output=True, text=True, check=True)
-            # Print the output
             version = result.stdout.strip().split()[2]
             return version
         except FileNotFoundError:
@@ -38,16 +34,36 @@ class CMakeLists:
             raise
         
     def __find_files(self, start_dir: str, extensions: tuple = (".cpp", )) -> list:
-        """Find files with specified extensions."""
         return [
             os.path.relpath(os.path.join(dirpath, file), start=start_dir)
-            for dirpath, _, files in os.walk(start_dir)
+            for dirpath, dirnames, files in os.walk(start_dir)
+            if "build" not in dirpath.split(os.sep)
             for file in files if file.endswith(extensions)
         ]
-        
+            
     def find_project_files(self):
-        src_files = self.__find_files(self.__src_dir)
-        self.__include_files = self.__find_files(self.__include_dir)
+        def parse_langs(languages: list):
+            langs = languages
+            extensions = []
+            
+            if "C" in langs:
+                extensions.append(".c")
+            if "CXX" in langs:
+                extensions.append(".cpp")
+            if "CSharp" in langs:
+                extensions.append(".cs")
+            if "OBJC" in langs:
+                extensions.append(".m")
+            if "OBJCXX" in langs:
+                extensions.append(".mm")
+            if "CUDA" in langs:
+                extensions.append(".cu")
+                
+            return tuple(extensions)
+                
+        extentions = parse_langs(self.__languages)
+        
+        src_files = self.__find_files(self.__root_dir, extensions=extentions)
         
         if not src_files:
             raise FileNotFoundError("No source files found in 'src' directory.")
@@ -55,18 +71,20 @@ class CMakeLists:
         self.__src_files = src_files
         
     def generate_cmake(self):
-        
         PROJECT_NAME = r'${PROJECT_NAME}'
         SOURCES = r'${SOURCES}'
         
+        version = " VERSION "+self.__proj_version if self.__proj_version else ""
         src_files = "\n    ".join(self.__src_files)
+        languages = " ".join(self.__languages)
         
         cmake_content = f"""cmake_minimum_required(VERSION {self.__version})
-project({self.__project_name})
+project({self.__project_name}{version} LANGUAGES {languages})
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD {self.__cxx_std})
 set(CMAKE_CXX_STANDARD_REQUIRED {self.__cxx_std_not_required})
+set(CMAKE_CXX_EXTENSIONS {self.__cxx_extensions})
 
 # Include directories
 include_directories(include)
@@ -76,7 +94,7 @@ set(SOURCES
     {src_files}
 )
 
-# Add the executable
+# Add the executables
 add_executable({PROJECT_NAME} {SOURCES})
 """
         
@@ -99,4 +117,3 @@ add_executable({PROJECT_NAME} {SOURCES})
     @property
     def cmake_version(self):
         return self.__version
-    
