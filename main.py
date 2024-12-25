@@ -1,3 +1,12 @@
+"""
+Project: Project Name
+Author: Victor Cruz
+Date Created: 2024-12-20
+Last Modified: 2024-12-25
+Description: This script generates a CMake file, including specifying languages and versioning, among other options.
+"""
+
+
 from pymake.CMakeLists import *
 
 def main() -> None:

@@ -123,7 +123,7 @@ set(SOURCES
     {src_files}
 )
 
-# Add the executable
+# Add the executables
 add_executable({PROJECT_NAME} {SOURCES})
 """
         
