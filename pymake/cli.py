@@ -41,8 +41,8 @@ class CommandInterface:
     def _create_parser(self) -> None:
         create_parser = self.subparsers.add_parser("create", help="Create a new CMake project")
         create_parser.add_argument("project_name", type=str, help="The name of the project")
-        create_parser.add_argument("-l", "--languages", nargs="*", default=["CXX"], choices=self.supported_languages, metavar="LANG", help="Which languages needed to build the project")
-        create_parser.add_argument("--cxx-standard", type=int, default=17, choices=self.cpp_standards, help="Which version of compiler to use")
+        create_parser.add_argument("-l", "--languages", nargs="*", default=["CXX"], choices=self.__supported_languages, metavar="LANG", help="Which languages needed to build the project")
+        create_parser.add_argument("--cxx-standard", type=int, default=17, choices=self.__cpp_standards, help="Which version of compiler to use")
         create_parser.add_argument("--cxx-standard-not-required", action="store_true", help="Whether or not to require the compiler version specified")
         create_parser.add_argument("--cxx-extensions", type=str_to_bool, default=True, choices=[True, False], metavar="{on, off}", help="Whether compiler specific extensions should be used")
         create_parser.add_argument("-cdirs", "--create-dirs", action="store_true", help="Whether or not to create the default directories for the project {src, include, build}")
