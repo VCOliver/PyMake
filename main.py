@@ -12,14 +12,19 @@ from pymake.CMakeLists import CMakeLists
 def main() -> None:
     parser = CommandInterface().create_parsers()
     args = parser.parse_arguments()
-    cmake = CMakeLists(args.project_name, 
-                       args.version, 
-                       args.languages, 
-                       args.cxx_standard, 
-                       args.cxx_standard_not_required, 
-                       args.cxx_extensions)
-    cmake.find_project_files()
-    cmake.generate_cmake()
+    
+    if args.command == "build":
+        print("Building project...")
+        
+    if args.command == "create":
+        cmake = CMakeLists(args.project_name, 
+                        args.version, 
+                        args.languages, 
+                        args.cxx_standard, 
+                        args.cxx_standard_not_required, 
+                        args.cxx_extensions)
+        cmake.find_project_files()
+        cmake.generate_cmake()
 
 if __name__ == "__main__":
     main()

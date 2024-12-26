@@ -1,25 +1,15 @@
 import argparse
 from pymake.utils import str_to_bool
 
-# def parse_arguments():
-#     cpp_standards = [98, 3, 11, 14, 17, 20, 23]
-#     supported_languages = ["CXX", "C", "CSharp", "CUDA", "OBJC", "OBJCXX"]
-    
-#     parser = argparse.ArgumentParser(prog="PyMake", description="A CMake generator for small projects")
-#     parser.add_argument("project_name", type=str, help="The name of the project")
-#     parser.add_argument("-v", "--version", type=str, help="Project version")
-#     parser.add_argument("-l", "--languages", nargs="*", default=["CXX"], choices=supported_languages, metavar="LANG", help="Which languages needed to build the project")
-#     parser.add_argument("--cxx-standard", type=int, default=17, choices=cpp_standards, help="Which version of compiler to use")
-#     parser.add_argument("--cxx-standard-not-required", action="store_true", help="Whether or not to require the compiler version specified")
-#     parser.add_argument("--cxx-extensions", type=str_to_bool, default=True, choices=[True, False], metavar="{on, off}", help="Whether compiler specific extensions should be used")
-    
-#     """Under test"""
-    
-#     parser.add_argument("-cdirs", "--create-dirs", action="store_true", help="Whether or not to create the default directories for the project {src, include, build}")
-#     parser.add_argument("-b", "--build", action="store_true", help="Whether or not to build the project after generating the CMakeLists.txt")
-#     parser.add_argument("--clean", action="store_true", help="Whether or not to clean the build directory")
-    
-#     return parser.parse_args()
+class CustomArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        if "invalid choice" in message:
+            invalid_command = message.split("'")[1]
+            print(f"Error: '{invalid_command}' is not a valid command.")
+        else:
+            print(f"Error: {message}")
+        print("Run 'pymake --help' for more information.")
+        self.exit(2)
 
 class CommandInterface:
     def __init__(self):
@@ -29,7 +19,7 @@ class CommandInterface:
         self.description = "A CMake generator for small projects"
     
     def create_parsers(self):
-        self.parser = argparse.ArgumentParser(prog=self.name, description=self.description)
+        self.parser = CustomArgumentParser(prog=self.name, description=self.description)
         self._add_subparsers()
         return self
 
@@ -49,7 +39,6 @@ class CommandInterface:
         
     def _build_parser(self) -> None:
         build_parser = self.subparsers.add_parser("build", help="Build the project")
-        build_parser.add_argument("project_name", type=str, help="The name of the project")
         build_parser.add_argument("-b", "--build", action="store_true", help="Whether or not to build the project after generating the CMakeLists.txt")
         build_parser.add_argument("--clean", action="store_true", help="Whether or not to clean the build directory")
 
