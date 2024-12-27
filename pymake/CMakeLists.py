@@ -84,12 +84,12 @@ class CMakeLists:
         PROJECT_NAME = r'${PROJECT_NAME}'
         SOURCES = r'${SOURCES}'
         
-        self._printv(f"Generating CMakeLists.txt for project: '{self.__project_name}'")
-        
         version = ""
         if self.__proj_version:
             version = " VERSION "+self.__proj_version
             self._printv(f"Project version specified: {self.__proj_version}")
+        
+        self._printv(f"Generating CMakeLists.txt for project: '{self.__project_name}'")
         
         src_files = "\n    ".join(self.__src_files)
         languages = " ".join(self.__languages)

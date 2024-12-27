@@ -22,17 +22,20 @@ def build(args: BuildArguments) -> None:
         if not os.path.exists(build_dir):
             os.makedirs(build_dir)
             printv("Created build directory.", args.verbose)
-            
-        subprocess.run(["cmake", "-S", ".", "-B", build_dir], check=True)
-        printv("CMake files generated.", args.verbose)
         
-        subprocess.run(["make", "-C", build_dir], check=True)
+        if args.verbose:
+            subprocess.run(["cmake", "-S", ".", "-B", build_dir], check=True)
+            printv("CMake files generated.", args.verbose)
+            
+            subprocess.run(["make", "-C", build_dir], check=True)
+        else:
+            subprocess.run(["cmake", "-S", ".", "-B", build_dir], stdout=subprocess.DEVNULL, check=True)
+            subprocess.run(["make", "-C", build_dir, '-s'], check=True)
         printv("Project built.", args.verbose)
                 
         
 
 def create(args: CreateArguments) -> None:
-    print(type(args.verbose))
     if args.create_dirs:
         dirs = ["src", "include", "build"]
         for d in dirs:
