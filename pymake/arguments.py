@@ -30,10 +30,11 @@ class CreateArguments(ParsedArguments):
         self.create_dirs = namespace.create_dirs
 
     def __str__(self):
-        return (f"CreateArguments(project_name={self.project_name}, version={self.version}, "
-                f"languages={self.languages}, cxx_standard={self.cxx_standard}, "
-                f"cxx_standard_not_required={self.cxx_standard_not_required}, "
-                f"cxx_extensions={self.cxx_extensions}, create_dirs={self.create_dirs}, verbose={self.verbose})")
+        attrs = []
+        for attr, value in self.__dict__.items():
+            attrs.append(f"{attr}: {value}")
+            
+        return "CreateArguments(\n" + "\n".join(attrs) + "\n)"
         
 class BuildArguments(ParsedArguments):
     def __init__(self, namespace: argparse.Namespace):

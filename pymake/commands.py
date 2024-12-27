@@ -17,7 +17,7 @@ def build(args: BuildArguments) -> None:
             shutil.rmtree(build_dir)
             printv(f"Removed build directory.", args.verbose)
         else:
-            raise NotADirectoryError(f"Build directory does not exist: {build_dir}")
+            printv(f"Build directory does not exist.", args.verbose)
     else:
         if not os.path.exists(build_dir):
             os.makedirs(build_dir)

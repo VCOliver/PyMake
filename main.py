@@ -11,7 +11,6 @@ from pymake.cli import CommandInterface
 def main() -> None:
     parser = CommandInterface().create_parsers()
     args = parser.parse_arguments()
-    print(args)
     args.parse_commands()
 
 if __name__ == "__main__":
