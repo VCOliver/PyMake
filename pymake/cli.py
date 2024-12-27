@@ -1,16 +1,7 @@
 import argparse
 from pymake.utils import str_to_bool
 from pymake.commands import create, build
-
-class CustomArgumentParser(argparse.ArgumentParser):
-    def error(self, message):
-        if "invalid choice" in message:
-            invalid_command = message.split("'")[1]
-            print(f"Error: '{invalid_command}' is not a valid command.")
-        else:
-            print(f"Error: {message}")
-        print("Run 'pymake --help' for more information.")
-        self.exit(2)
+from pymake.arguments import BuildArguments, CreateArguments, CustomArgumentParser
 
 class CommandInterface:
     def __init__(self):
@@ -20,12 +11,12 @@ class CommandInterface:
         self.description = "A CMake generator for small projects"
     
     def create_parsers(self):
-        self.parser = CustomArgumentParser(prog=self.name, description=self.description)
+        self.parser = CustomArgumentParser(prog=self.name, description=self.description)        
         self._add_subparsers()
         return self
 
     def _add_subparsers(self):
-        self.subparsers = self.parser.add_subparsers()
+        self.subparsers = self.parser.add_subparsers(dest="command", title="Commands", description="Available commands")
         self._create_parser()
         self._build_parser()
 
@@ -38,29 +29,18 @@ class CommandInterface:
         create_parser.add_argument("--cxx-standard-not-required", action="store_true", help="Whether or not to require the compiler version specified")
         create_parser.add_argument("--cxx-extensions", type=str_to_bool, default=True, choices=[True, False], metavar="{on, off}", help="Whether compiler specific extensions should be used")
         create_parser.add_argument("-cdirs", "--create-dirs", action="store_true", help="Whether or not to create the default directories for the project {src, include, build}")
+        create_parser.add_argument("--verbose", action="store_true", help="Print the steps of the project creation process")
         create_parser.set_defaults(func=create)
         
     def _build_parser(self) -> None:
         build_parser = self.subparsers.add_parser("build", help="Build the project")
-        build_parser.add_argument("-b", "--build", action="store_true", help="Whether or not to build the project after generating the CMakeLists.txt")
         build_parser.add_argument("--clean", action="store_true", help="Whether or not to clean the build directory")
+        build_parser.add_argument("--verbose", action="store_true", help="Print the steps of the build process")
         build_parser.set_defaults(func=build)
-
-    class ParsedArguments:
-        def __init__(self, namespace: argparse.Namespace):
-            self.__namespace = namespace
-            self.func = namespace.func
-            self.project_name = namespace.project_name
-            self.version = namespace.version
-            self.languages = namespace.languages
-            self.cxx_standard = namespace.cxx_standard
-            self.cxx_standard_not_required = namespace.cxx_standard_not_required
-            self.cxx_extensions = namespace.cxx_extensions
-            self.create_dirs = namespace.create_dirs
-            
-        def parse_commands(self):
-            self.__namespace.func(self.__namespace)
 
     def parse_arguments(self):
         args = self.parser.parse_args()
-        return self.ParsedArguments(args)
+        if args.command == 'create':
+            return CreateArguments(args)
+        else:
+            return BuildArguments(args)

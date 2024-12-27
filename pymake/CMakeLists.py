@@ -1,5 +1,6 @@
 import os
 import subprocess
+from .utils import VCOLOR, RESET_STYLE
 
 class CMakeLists:    
     def __init__(self, project_name: str, 
@@ -7,7 +8,8 @@ class CMakeLists:
                  languages: list=["CXX"], 
                  cxx_std=17, 
                  cxx_stc_not_required=False,
-                 cxx_extensions=True):
+                 cxx_extensions=True,
+                 verbose=False):
         self.__project_name = project_name
         self.__proj_version = proj_version
         self.__languages = languages
@@ -15,14 +17,21 @@ class CMakeLists:
         self.__cxx_std: int = cxx_std
         self.__cxx_std_not_required: bool = "OFF" if cxx_stc_not_required else "ON"
         self.__cxx_extensions: bool = "ON" if cxx_extensions else "OFF"
+        self._verbose: bool = verbose
+        print(f"\nVerbose: {self._verbose}\n")
         self.__root_dir: str = os.getcwd()
         self.__src_dir: str = os.path.join(self.__root_dir, "src")
         self.__include_dir: str = os.path.join(self.__root_dir, "include")
+        
+    def _printv(self, message: str) -> None:
+        if self._verbose:
+            print(f"{VCOLOR}pymake:{RESET_STYLE} {message}")
 
     def __get_cmake_version(self) -> str:
         try:
             result = subprocess.run(['cmake', '--version'], capture_output=True, text=True, check=True)
             version = result.stdout.strip().split()[2]
+            self._printv(f"CMake version found: {version}")
             return version
         except FileNotFoundError:
             RED = "\033[31m"
@@ -62,8 +71,10 @@ class CMakeLists:
             return tuple(extensions)
                 
         extentions = parse_langs(self.__languages)
+        self._printv(f"Languages selected: {self.__languages}")
         
         src_files = self.__find_files(self.__root_dir, extensions=extentions)
+        self._printv(f"Source files found: {src_files}")
         
         if not src_files:
             raise FileNotFoundError("No source files found in 'src' directory.")
@@ -74,7 +85,13 @@ class CMakeLists:
         PROJECT_NAME = r'${PROJECT_NAME}'
         SOURCES = r'${SOURCES}'
         
-        version = " VERSION "+self.__proj_version if self.__proj_version else ""
+        self._printv(f"Generating CMakeLists.txt for project: '{self.__project_name}'")
+        
+        version = ""
+        if self.__proj_version:
+            version = " VERSION "+self.__proj_version
+            self._printv(f"Project version specified: {self.__proj_version}")
+        
         src_files = "\n    ".join(self.__src_files)
         languages = " ".join(self.__languages)
         
@@ -107,7 +124,7 @@ add_executable({PROJECT_NAME} {SOURCES})
         with open(cmake_path, "w") as cmake_file:
             cmake_file.write(cmake_content)
             
-        print(f"CMakeLists.txt generated in {self.__root_dir}.")
+        self._printv(f"CMakeLists.txt generated in {self.__root_dir}.")
         
     @property
     def project_name(self):
