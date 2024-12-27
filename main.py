@@ -6,19 +6,12 @@ Last Modified: 2024-12-25
 Description: This script generates a CMake file, including specifying languages and versioning, among other options.
 """
 
-from pymake.cli import parse_arguments
-from pymake.CMakeLists import CMakeLists
+from pymake.cli import CommandInterface
 
 def main() -> None:
-    args = parse_arguments()
-    cmake = CMakeLists(args.project_name, 
-                       args.version, 
-                       args.languages, 
-                       args.cxx_standard, 
-                       args.cxx_standard_not_required, 
-                       args.cxx_extensions)
-    cmake.find_project_files()
-    cmake.generate_cmake()
+    parser = CommandInterface().create_parsers()
+    args = parser.parse_arguments()
+    args.parse_commands()
 
 if __name__ == "__main__":
     main()

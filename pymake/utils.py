@@ -1,4 +1,5 @@
 import argparse
+from colorama import Fore, Style
 
 def str_to_bool(value):
     """Convert string to boolean."""
@@ -8,3 +9,6 @@ def str_to_bool(value):
         return False
     else:
         raise argparse.ArgumentTypeError(f"Invalid boolean value: {value}")
+    
+VCOLOR = Fore.LIGHTCYAN_EX + Style.BRIGHT
+RESET_STYLE = Style.RESET_ALL
