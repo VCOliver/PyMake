@@ -4,7 +4,7 @@
 # -------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.25.1)
-project(test LANGUAGES CXX)
+project(nome LANGUAGES CXX)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)

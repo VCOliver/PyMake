@@ -10,6 +10,7 @@ class CMakeLists:
                  cxx_stc_not_required=False,
                  cxx_extensions=True,
                  verbose=False):
+        self._verbose: bool = verbose
         self.__project_name = project_name
         self.__proj_version = proj_version
         self.__languages = languages
@@ -17,13 +18,11 @@ class CMakeLists:
         self.__cxx_std: int = cxx_std
         self.__cxx_std_not_required: bool = "OFF" if cxx_stc_not_required else "ON"
         self.__cxx_extensions: bool = "ON" if cxx_extensions else "OFF"
-        self._verbose: bool = verbose
-        print(f"\nVerbose: {self._verbose}\n")
         self.__root_dir: str = os.getcwd()
         self.__src_dir: str = os.path.join(self.__root_dir, "src")
         self.__include_dir: str = os.path.join(self.__root_dir, "include")
         
-    def _printv(self, message: str) -> None:
+    def _printv(self, message: str):
         if self._verbose:
             print(f"{VCOLOR}pymake:{RESET_STYLE} {message}")
 
