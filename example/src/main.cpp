@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ncurses.h>
 #include "../include/hello/hello.hpp"
 
 int main(){

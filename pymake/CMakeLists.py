@@ -1,6 +1,6 @@
 import os
 import subprocess
-from .utils import VCOLOR, RESET_STYLE
+from .utils import NON_STD_LIBRARIES, VCOLOR, RESET_STYLE
 
 class CMakeLists:    
     def __init__(self, project_name: str, 
@@ -80,6 +80,17 @@ class CMakeLists:
         
         self.__src_files = src_files
         
+    def _find_libraries(self):
+        libraries = set()
+        for file in self.__src_files:
+            with open(file, "r") as src_file:
+                for line in src_file:
+                    if "#include" in line:
+                        for lib in NON_STD_LIBRARIES:
+                            if lib in line:
+                                libraries.add(NON_STD_LIBRARIES[lib])
+        return libraries
+        
     def generate_cmake(self):
         PROJECT_NAME = r'${PROJECT_NAME}'
         SOURCES = r'${SOURCES}'
@@ -93,6 +104,16 @@ class CMakeLists:
         
         src_files = "\n    ".join(self.__src_files)
         languages = " ".join(self.__languages)
+        
+        libraries = self._find_libraries()
+        lib_str = ""
+        target_link_str = ""
+        if libraries:
+            for lib in libraries:
+                lib_str += f"find_package({lib} REQUIRED)\n"
+                target_link_str += f"target_link_libraries({PROJECT_NAME} ${{{lib.upper()}_LIBRARIES}})\n"
+                self._printv(f"Library found: {lib}")
+            lib_str = "\n# Libraries\n"+lib_str
         
         cmake_content = f"""# -------------------------------------------------------------------
 # CMake configuration file
@@ -109,7 +130,7 @@ set(CMAKE_CXX_EXTENSIONS {self.__cxx_extensions})
 
 # Include directories
 include_directories(include)
-
+{lib_str}
 # Source files
 set(SOURCES
     {src_files}
@@ -117,6 +138,7 @@ set(SOURCES
 
 # Add the executables
 add_executable({PROJECT_NAME} {SOURCES})
+{target_link_str}
 """
         
         cmake_path = os.path.join(self.__root_dir, "CMakeLists.txt")

@@ -4,7 +4,7 @@
 # -------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.25.1)
-project(test VERSION 0.0.1 LANGUAGES CXX)
+project(test LANGUAGES CXX)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -14,6 +14,10 @@ set(CMAKE_CXX_EXTENSIONS ON)
 # Include directories
 include_directories(include)
 
+# Libraries
+find_package(Curses REQUIRED)
+find_package(Boost REQUIRED)
+
 # Source files
 set(SOURCES
     src/main.cpp
@@ -22,3 +26,6 @@ set(SOURCES
 
 # Add the executables
 add_executable(${PROJECT_NAME} ${SOURCES})
+target_link_libraries(${PROJECT_NAME} ${CURSES_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${BOOST_LIBRARIES})
+
