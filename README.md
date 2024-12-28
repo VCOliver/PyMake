@@ -1,23 +1,25 @@
 # PyMake
 
-PyMake is a Python script designed to streamline the generation of `CMakeLists.txt` files for small projects. It simplifies project setup by providing an easy-to-use command-line interface to configure CMake options for various programming languages and standards.
+PyMake is a Python-based command-line tool designed to simplify the process of generating and managing `CMakeLists.txt` files for small projects. It offers a modular and extensible interface for project creation and building.
 
 ## Features
 
-- Supports multiple programming languages:
+- **Commands**:
+  - `create`: Set up a new CMake project with configurable options.
+  - `build`: Build the project with optional cleaning of the build directory.
+- **Supported Languages**:
   - C++ (`CXX`)
   - C
   - C#
   - CUDA
   - Objective-C (`OBJC`)
   - Objective-C++ (`OBJCXX`)
-- Configurable C++ standards:
+- **C++ Standards**:
   - 98, 3, 11, 14, 17, 20, 23
-- Flexible project versioning.
-- Options to:
-  - Require or not require a specific C++ standard.
-  - Enable or disable compiler-specific extensions.
-- Automatically sets up source (`src/`) and include (`include/`) directories based on the current working directory.
+- **Flexible Options**:
+  - Specify compiler standards, require or skip version enforcement, enable/disable compiler extensions.
+  - Automatically create default project directories (`src`, `include`, `build`).
+  - Verbose output for detailed step tracking.
 
 ## Installation
 
@@ -27,36 +29,56 @@ PyMake is a Python script designed to streamline the generation of `CMakeLists.t
    cd <repository-directory>
    ```
 2. Ensure you have Python installed (Python 3.11+ recommended).
-3. Install dependencies if required:
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 
 ## Usage
 
-Run the script with the desired arguments:
+Run the script using the following structure:
 
 ```bash
-python pymake.py <project_name> [options]
+pymake <command> [options]
 ```
 
-### Arguments
+### Commands
 
-| Argument                     | Description                                                  | Default      |
-|------------------------------|--------------------------------------------------------------|--------------|
-| `project_name`               | The name of the CMake project.                              | None         |
-| `-v`, `--version`            | The version of the project.                                 | None         |
-| `-l`, `--languages`          | Languages needed to build the project.                      | `CXX`        |
-| `--cxx-standard`             | Specify the C++ standard to use.                            | `17`         |
-| `--cxx-standard-not-required`| If specified, the C++ standard will not be required.         | `False`      |
-| `--cxx-extensions`           | Whether to use compiler-specific extensions.                | `True`       |
+#### `create`
+Create a new CMake project.
 
-### Example
+| Argument                     | Description                                                                 | Default       |
+|------------------------------|-----------------------------------------------------------------------------|---------------|
+| `project_name`               | The name of the project.                                                   | None          |
+| `-v`, `--version`            | The version of the project.                                                | None          |
+| `-l`, `--languages`          | List of languages required for the project.                                | `CXX`         |
+| `--cxx-standard`             | Specify the C++ standard to use.                                           | `17`          |
+| `--cxx-standard-not-required`| If specified, the C++ standard will not be enforced.                        | `False`       |
+| `--cxx-extensions`           | Whether compiler-specific extensions should be enabled.                    | `True`        |
+| `-C`, `--create-dirs`        | Create default directories (`src`, `include`, `build`).                    | `False`       |
+| `--verbose`                  | Enable verbose output during project creation.                             | `False`       |
+
+#### Example
 
 ```bash
-python pymake.py MyProject -v 1.0.0 -l CXX CUDA --cxx-standard 20 --cxx-extensions False
+pymake create MyProject -v 1.0.0 -l CXX CUDA --cxx-standard 20 -C --verbose
 ```
-This generates a `CMakeLists.txt` file for a project named `MyProject` with version `1.0.0`, using C++ and CUDA, targeting the C++20 standard without compiler-specific extensions.
+
+#### `build`
+Build the existing project.
+
+| Argument        | Description                                        | Default |
+|------------------|----------------------------------------------------|---------|
+| `--clean`        | Clean the build directory before building.         | `False` |
+| `--verbose`      | Enable verbose output during the build process.    | `False` |
+
+#### Example
+
+```bash
+pymake build --clean --verbose
+```
+
+---
 
 Happy coding with PyMake!
 
