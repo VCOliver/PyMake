@@ -3,7 +3,7 @@ import shutil
 import subprocess
 from .CMakeLists import CMakeLists
 from .arguments import BuildArguments, CreateArguments
-from .utils import VCOLOR, RESET_STYLE
+from .utils import VCOLOR, RESET_STYLE, create_run_shell_command
 
 def printv(message: str, verbose: bool) -> None:
     pymake = f"{VCOLOR}pymake:{RESET_STYLE}"
@@ -53,3 +53,6 @@ def create(args: CreateArguments) -> None:
                        verbose=args.verbose)
     cmake.find_project_files()
     cmake.generate_cmake()
+    
+    """Under testing"""
+    create_run_shell_command(args.project_name)
